@@ -151,3 +151,11 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 POSTS_PER_PAGE = 10
 POSTS_ON_SECOND_PAGE = 3
 POST_LENGTH = 15
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
+CSRF_FAILURE_VIEW = 'core.views.csrf_failure'

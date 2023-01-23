@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
 {% block title %} Последние обновления на сайте {% endblock %} 
-{% block content %}   
+{% block content %}
   <h1>Последние обновления на сайте</h1>
-  {% for post in page_obj %}
-    {% include 'includes/card_post.html' with group_check=post.group %}
-  {% endfor %}
+  {% load cache %}
+  {% cache 20 key_prefix='index_page' %}
+    {% for post in page_obj %}
+      {% include 'includes/card_post.html' with group_check=post.group %}
+    {% endfor %}
+  {% endcache %} 
   {% include 'posts/includes/paginator.html' %}
 {% endblock %}
