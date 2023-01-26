@@ -2,11 +2,12 @@
 {% block title %} Последние обновления на сайте {% endblock %} 
 {% block content %}
   <h1>Последние обновления на сайте</h1>
+  {% include 'posts/includes/switcher.html' %}
   {% load cache %}
-  {% cache 20 key_prefix='index_page' %}
+  {% cache 20 key_prefix='index_page' page_obj.number %}
     {% for post in page_obj %}
       {% include 'includes/card_post.html' with group_check=post.group %}
     {% endfor %}
-  {% endcache %} 
-  {% include 'posts/includes/paginator.html' %}
+    {% include 'posts/includes/paginator.html' %}
+  {% endcache %}
 {% endblock %}

@@ -4,8 +4,9 @@ from django.shortcuts import render, get_object_or_404
 from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.core.cache import cache
 
-from .models import Post, Group
+from .models import Post, Group, Follow
 from .forms import PostForm, CommentForm
 
 
@@ -25,6 +26,7 @@ def index(request):
     context = {
         'page_obj': paging(request, post_list),
     }
+    print(cache._cache.keys())
     return render(request, template, context)
 
 
@@ -108,3 +110,26 @@ def add_comment(request, post_id):
         comment.post = post
         comment.save()
     return redirect('posts:post_detail', post_id=post_id)
+
+
+@login_required
+def follow_index(request):
+    
+
+    context = {}
+    return render(request, 'posts/follow.html', context)
+
+@login_required
+def profile_follow(request, username):
+    # Подписаться на автора
+    template = 'posts/follow.html'
+    posts = Post.objects.filter()
+
+
+@login_required
+def profile_unfollow(request, username):
+    # Дизлайк, отписка
+    template = 'posts/unfollow.html'
+
+ 
+
