@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
 from django.conf import settings
-from django.core.cache import cache
+# from django.core.cache import cache
 
 from .models import Post, Group, Follow
 from .forms import PostForm, CommentForm
@@ -26,7 +26,8 @@ def index(request):
     context = {
         'page_obj': paging(request, post_list),
     }
-    print(cache._cache.keys())
+    # print(cache._cache.keys())
+    # print(paging(request, post_list).number)
     return render(request, template, context)
 
 
