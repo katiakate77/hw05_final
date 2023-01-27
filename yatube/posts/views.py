@@ -4,7 +4,6 @@ from django.shortcuts import render, get_object_or_404
 from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
 from django.conf import settings
-# from django.core.cache import cache
 
 from .models import Post, Group, Follow
 from .forms import PostForm, CommentForm
@@ -26,8 +25,6 @@ def index(request):
     context = {
         'page_obj': paging(request, post_list),
     }
-    # print(cache._cache.keys())
-    # print(paging(request, post_list).number)
     return render(request, template, context)
 
 
@@ -46,10 +43,15 @@ def profile(request, username):
     user = get_object_or_404(User, username=username)
     posts = user.posts.all()
     template = 'posts/profile.html'
+    following = (
+        request.user.is_authenticated and 
+        Follow.objects.filter(user=request.user, author=user).exists()
+    )
     context = {
         'author': user,
         'posts': posts,
         'page_obj': paging(request, posts),
+        'following': following,
     }
     return render(request, template, context)
 
@@ -115,22 +117,29 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    
-
-    context = {}
+    post_list = Post.objects.filter(author__following__user=request.user)
+    context = {
+        'page_obj': paging(request, post_list),
+    }
     return render(request, 'posts/follow.html', context)
+
 
 @login_required
 def profile_follow(request, username):
-    # Подписаться на автора
     template = 'posts/follow.html'
-    posts = Post.objects.filter()
+    user = get_object_or_404(User, username=username)
+    if request.user != user:
+        Follow.objects.get_or_create(user=request.user, author=user)
+    return redirect('posts:follow_index')
 
 
 @login_required
 def profile_unfollow(request, username):
-    # Дизлайк, отписка
     template = 'posts/unfollow.html'
+    user = get_object_or_404(User, username=username)
+    Follow.objects.filter(user=request.user, author=user).delete()
+    return redirect('posts:follow_index')
+
 
  
 
