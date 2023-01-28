@@ -8,8 +8,8 @@ from django.urls import reverse
 from django.conf import settings
 from django import forms
 
-from ..models import Post, Group
-
+from ..models import Post, Group, Comment
+from ..forms import CommentForm
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -85,6 +85,12 @@ class PostPagesTests(TestCase):
             group=cls.group,
             image=cls.uploaded,
         )
+        cls.comment = Comment.objects.create(
+            post=cls.post,
+            author=cls.user,
+            text='Тестовый комментарий',
+        )
+
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
 
@@ -145,3 +151,19 @@ class PostPagesTests(TestCase):
                 with self.subTest(value=value):
                     form_field = response.context.get('form').fields.get(value)
                     self.assertIsInstance(form_field, expected)
+
+    def test_post_detail_page_show_correct_context(self):
+        form_fields = {
+            'text': forms.fields.CharField,
+        }
+        response = self.authorized_client.get(
+            reverse('posts:post_detail', args=(self.post.id,)))
+        self.assertIn('form', response.context)
+        self.assertIsInstance(response.context.get('form'), CommentForm)
+        for value, expected in form_fields.items():
+            with self.subTest(value=value):
+                form_field = response.context.get('form').fields.get(value)
+                self.assertIsInstance(form_field, expected)
+        self.assertEqual(
+            response.context.get('comments')[0].text, self.comment.text
+        )
