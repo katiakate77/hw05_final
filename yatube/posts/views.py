@@ -49,7 +49,6 @@ def profile(request, username):
     )
     context = {
         'author': user,
-        'posts': posts,
         'page_obj': paging(request, posts),
         'following': following,
     }
