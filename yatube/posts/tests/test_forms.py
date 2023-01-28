@@ -99,7 +99,7 @@ class PostFormTests(TestCase):
         self.assertEqual(self.post.text, form_data['text'])
         self.assertEqual(self.post.group, self.group)
 
-    def test_comments_for_authorized_users(self):
+    def test_create_comment(self):
         """Валидная форма создает запись в Comment."""
         comments_count = Comment.objects.count()
         form_fields = {
