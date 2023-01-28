@@ -78,7 +78,7 @@ class PostFormTests(TestCase):
         self.assertEqual(created_post_obj.text, form_data['text'])
         self.assertEqual(created_post_obj.group, self.group)
         self.assertEqual(created_post_obj.image, '{}{}'
-                         .format(self.post._meta.get_field('image').upload_to,
+                         .format(Post._meta.get_field('image').upload_to,
                                  form_data.get('image'))
                          )
 
