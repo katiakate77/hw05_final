@@ -67,6 +67,7 @@ class Comment(CreatedModel):
         help_text='Введите текст комментария',
     )
 
+
 class Follow(models.Model):
     user = models.ForeignKey(
         User,
@@ -77,6 +78,6 @@ class Follow(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='following', 
+        related_name='following',
         verbose_name='Тот, на кого подписываются',
     )

@@ -1,13 +1,22 @@
+import shutil
+import tempfile
+
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from ..models import Post, Group
 
 
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
+
+
 User = get_user_model()
 
 
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostFormTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -22,6 +31,24 @@ class PostFormTests(TestCase):
             author=cls.user,
             text='Тестовый текст 2',
         )
+        cls.small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        cls.uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=cls.small_gif,
+            content_type='image/gif'
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self):
         self.authorized_client = Client()
@@ -33,6 +60,7 @@ class PostFormTests(TestCase):
         form_data = {
             'text': 'Тестовый текст',
             'group': self.group.id,
+            'image': self.uploaded,
         }
         response = self.authorized_client.post(
             reverse('posts:post_create'),
@@ -49,6 +77,10 @@ class PostFormTests(TestCase):
         created_post_obj = list(set_diff)[0]
         self.assertEqual(created_post_obj.text, form_data['text'])
         self.assertEqual(created_post_obj.group, self.group)
+        self.assertEqual(created_post_obj.image, '{}{}'
+                         .format(self.post._meta.get_field('image').upload_to,
+                                 form_data.get('image'))
+                         )
 
     def test_edit_post(self):
         """Валидная форма редактирует запись в Post."""
