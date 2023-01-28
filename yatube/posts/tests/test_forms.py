@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from ..models import Post, Group
+from ..models import Post, Group, Comment
 
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -98,3 +98,20 @@ class PostFormTests(TestCase):
         self.post.refresh_from_db()
         self.assertEqual(self.post.text, form_data['text'])
         self.assertEqual(self.post.group, self.group)
+
+    def test_comments_for_authorized_users(self):
+        """Валидная форма создает запись в Comment."""
+        comments_count = Comment.objects.count()
+        form_fields = {
+            'text': 'Тестовый комментарий',
+        }
+        response = self.authorized_client.post(
+            reverse('posts:add_comment', args=(self.post.id,)),
+            data=form_fields,
+            follow=True
+        )
+        self.assertRedirects(
+            response, reverse('posts:post_detail', args=(self.post.id,)))
+        self.assertEqual(Comment.objects.count(), comments_count + 1)
+        last_obj = Comment.objects.all().last()
+        self.assertEqual(last_obj.text, 'Тестовый комментарий')
