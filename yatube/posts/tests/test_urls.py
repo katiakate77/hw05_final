@@ -108,3 +108,7 @@ class PostURLTests(TestCase):
             with self.subTest(address=address):
                 response = self.authorized_client_1.get(address)
                 self.assertTemplateUsed(response, template)
+
+    def test_page_not_found_uses_correct_template(self):
+        response = self.guest_client.get('/unexisting_page/')
+        self.assertTemplateUsed(response, 'core/404.html')

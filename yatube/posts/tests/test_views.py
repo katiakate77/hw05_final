@@ -117,3 +117,7 @@ class PostPagesTests(TestCase):
                 with self.subTest(value=value):
                     form_field = response.context.get('form').fields.get(value)
                     self.assertIsInstance(form_field, expected)
+
+
+
+

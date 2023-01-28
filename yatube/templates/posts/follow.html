@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %} Посты авторов, на которых подписан пользователь {% endblock %} 
 {% block content %}
-  <h1>Посты авторов, на которых подписан {{ user }}</h1>
+  <h1>Посты авторов, на которых подписан {{ user.username }}</h1>
   {% include 'posts/includes/switcher.html' with follow=True %}
   {% for post in page_obj %}
     {% include 'includes/card_post.html' with group_check=post.group %}
