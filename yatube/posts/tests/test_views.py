@@ -202,7 +202,7 @@ class FollowViewsTests(TestCase):
         cls.authorized_client_follower = Client()
         cls.authorized_client_follower.force_login(cls.follower)
 
-    def test_follow_user(self):
+    def test_following_users(self):
         """Авторизованный пользователь может подписываться
         на других пользователей"""
         follow_count = Follow.objects.count()
