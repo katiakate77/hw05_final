@@ -202,7 +202,15 @@ class FollowViewsTests(TestCase):
         cls.authorized_client_follower = Client()
         cls.authorized_client_follower.force_login(cls.follower)
 
-    def test_follow_index_posts(self):
+    def test_follow_user(self):
+        """Авторизованный пользователь может подписываться
+        на других пользователей"""
+        follow_count = Follow.objects.count()
+        self.authorized_client_follower.get(
+            reverse('posts:profile_follow', args=(self.author.username,)))
+        self.assertEqual(Follow.objects.count(), follow_count + 1)
+
+    def test_follow_index_show_posts(self):
         """Новая запись пользователя появляется в ленте тех,
         кто на него подписан"""
         response = self.authorized_client_follower.get(
