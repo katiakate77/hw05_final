@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.conf import settings
 from django import forms
 
-from ..models import Post, Group, Comment
+from ..models import Post, Group, Comment, Follow
 from ..forms import CommentForm
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -91,7 +91,6 @@ class PostPagesTests(TestCase):
             author=cls.user,
             text='Тестовый комментарий',
         )
-
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
 
@@ -186,3 +185,34 @@ class PostPagesTests(TestCase):
         response = self.authorized_client.get(reverse('posts:index'))
         resp_content_3 = response.content
         self.assertNotEqual(resp_content_2, resp_content_3)
+
+
+class FollowViewsTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.author = User.objects.create_user(username='test_author')
+        cls.follower = User.objects.create_user(username='test_follower')
+        cls.post = Post.objects.create(
+            text='Текст для подписки',
+            author=cls.author,
+        )
+        cls.authorized_client_author = Client()
+        cls.authorized_client_author.force_login(cls.author)
+        cls.authorized_client_follower = Client()
+        cls.authorized_client_follower.force_login(cls.follower)
+
+    def test_follow_index_posts(self):
+        """Новая запись пользователя появляется в ленте тех,
+        кто на него подписан"""
+        response = self.authorized_client_follower.get(
+            reverse('posts:follow_index')
+        )
+        self.assertNotIn(
+            self.post, response.context.get('page_obj').object_list
+        )
+        Follow.objects.create(user=self.follower, author=self.author)
+        response = self.authorized_client_follower.get(
+            reverse('posts:follow_index')
+        )
+        self.assertIn(self.post, response.context.get('page_obj').object_list)
