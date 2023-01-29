@@ -1,6 +1,7 @@
 import shutil
 import tempfile
 
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
@@ -167,3 +168,21 @@ class PostPagesTests(TestCase):
         self.assertEqual(
             response.context.get('comments')[0].text, self.comment.text
         )
+
+    def test_check_cache_index_page(self):
+        """Проверка кеширования главной страницы."""
+        self.post_2 = Post.objects.create(
+            text='Текст 2',
+            author=self.user,
+            group=self.group,
+        )
+        response = self.authorized_client.get(reverse('posts:index'))
+        resp_content_1 = response.content
+        Post.objects.get(id=self.post_2.id).delete()
+        response = self.authorized_client.get(reverse('posts:index'))
+        resp_content_2 = response.content
+        self.assertEqual(resp_content_1, resp_content_2)
+        cache.clear()
+        response = self.authorized_client.get(reverse('posts:index'))
+        resp_content_3 = response.content
+        self.assertNotEqual(resp_content_2, resp_content_3)
