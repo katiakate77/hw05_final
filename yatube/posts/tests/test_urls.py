@@ -42,6 +42,7 @@ class PostURLTests(TestCase):
             ('posts:post_edit', (cls.post.id,),
              f'/posts/{cls.post.id}/edit/'),
             ('posts:post_create', None, '/create/'),
+            ('posts:follow_index', None, '/follow/'),
         )
 
     def test_check_reverse(self):
@@ -58,7 +59,10 @@ class PostURLTests(TestCase):
                     'posts:post_edit', args=(self.post.id,)
                 ):
                     self.assertRedirects(response, f'/auth/login/?next={url}')
-                elif url == reverse('posts:post_create'):
+                elif url in [
+                    reverse('posts:post_create'),
+                    reverse('posts:follow_index')
+                ]:
                     self.assertRedirects(response, f'/auth/login/?next={url}')
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
@@ -103,6 +107,7 @@ class PostURLTests(TestCase):
             reverse('posts:post_edit',
                     args=(self.post.id,)): 'posts/create_post.html',
             reverse('posts:post_create'): 'posts/create_post.html',
+            reverse('posts:follow_index'): 'posts/follow.html',
         }
         for address, template in templates_pages_names.items():
             with self.subTest(address=address):

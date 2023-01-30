@@ -12,6 +12,7 @@ from django import forms
 from ..models import Post, Group, Comment, Follow
 from ..forms import CommentForm
 
+
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
@@ -209,6 +210,18 @@ class FollowViewsTests(TestCase):
         self.authorized_client_follower.get(
             reverse('posts:profile_follow', args=(self.author.username,)))
         self.assertEqual(Follow.objects.count(), follow_count + 1)
+
+    def test_unfollowing_users(self):
+        """Авторизованный пользователь может отписаться
+        от других пользователей"""
+        Follow.objects.create(
+            user=self.follower,
+            author=self.author,
+        )
+        follow_count = Follow.objects.count()
+        self.authorized_client_follower.get(
+            reverse('posts:profile_unfollow', args=(self.author.username,)))
+        self.assertEqual(Follow.objects.count(), follow_count - 1)
 
     def test_follow_index_show_posts(self):
         """Новая запись пользователя появляется в ленте тех,
